@@ -1,0 +1,21 @@
+{
+  "name": "skillforge-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Data crawling and management scripts for SkillForge",
+  "scripts": {
+    "crawl": "npx tsx crawlers/index.ts",
+    "crawl:github": "npx tsx crawlers/github.ts",
+    "seed": "npx tsx seed.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
