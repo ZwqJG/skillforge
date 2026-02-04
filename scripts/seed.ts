@@ -57,6 +57,8 @@ async function importSkills(skills: SkillData[]) {
                     tags: skill.tags,
                     platforms: skill.platforms,
                     security_level: skill.security_level,
+                    security_report: skill.security_report ? JSON.parse(skill.security_report) : null,
+                    last_scanned_at: new Date().toISOString(),
                     skill_md_content: skill.skill_md_content,
                     usage_guide: skill.usage_guide,
                     author: skill.author,

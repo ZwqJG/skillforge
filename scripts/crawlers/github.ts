@@ -33,6 +33,7 @@ export interface SkillData {
     tags: string[];
     platforms: string[];
     security_level: number;
+    security_report: string;
     skill_md_content: string;
     usage_guide: string;
     author: string;
@@ -210,6 +211,10 @@ export async function crawlRepository(source: typeof GITHUB_SOURCES[0]): Promise
         return [];
     }
 
+    // 获取 README 作为 usage_guide
+    const readme = await getFileContent(source.owner, source.repo, 'README.md') ||
+        await getFileContent(source.owner, source.repo, 'readme.md') || '';
+
     const skillFiles = await getSkillFiles(source.owner, source.repo);
     console.log(`  Found ${skillFiles.length} SKILL.md files`);
 
@@ -225,6 +230,9 @@ export async function crawlRepository(source: typeof GITHUB_SOURCES[0]): Promise
         const parsed = parseSkillMd(content);
         const slug = generateSlug(parsed.name);
 
+        // 生成安全报告
+        const securityReport = generateSecurityReport(content, source.level);
+
         skills.push({
             name: parsed.name,
             slug,
@@ -237,8 +245,9 @@ export async function crawlRepository(source: typeof GITHUB_SOURCES[0]): Promise
             tags: parsed.tags.length > 0 ? parsed.tags : [source.category],
             platforms: ['claude-code', 'cursor', 'universal'],
             security_level: source.level,
+            security_report: securityReport,
             skill_md_content: content,
-            usage_guide: '',
+            usage_guide: readme,
             author: source.owner,
             license: repoInfo.license,
             version: '1.0.0',
@@ -249,6 +258,60 @@ export async function crawlRepository(source: typeof GITHUB_SOURCES[0]): Promise
     }
 
     return skills;
+}
+
+/**
+ * 生成安全报告
+ */
+function generateSecurityReport(content: string, level: number): string {
+    const checks = [];
+    const now = new Date().toISOString();
+
+    // 检查是否有危险命令
+    const hasDangerousCommands = /rm\s+-rf|sudo|curl.*\|.*sh|wget.*\|.*bash/i.test(content);
+    checks.push({
+        name: '危险命令检查',
+        status: hasDangerousCommands ? 'warning' : 'passed',
+        message: hasDangerousCommands ? '发现潜在危险命令' : '未发现危险命令',
+    });
+
+    // 检查是否有网络请求
+    const hasNetworkCalls = /fetch|axios|http|https:\/\/|api\./i.test(content);
+    checks.push({
+        name: '网络请求检查',
+        status: hasNetworkCalls ? 'warning' : 'passed',
+        message: hasNetworkCalls ? '包含网络请求相关代码' : '未发现外部网络请求',
+    });
+
+    // 检查是否有文件操作
+    const hasFileOps = /fs\.|writeFile|readFile|unlink|mkdir|rmdir/i.test(content);
+    checks.push({
+        name: '文件操作检查',
+        status: hasFileOps ? 'warning' : 'passed',
+        message: hasFileOps ? '包含文件系统操作' : '未发现文件系统操作',
+    });
+
+    // 检查是否有敏感信息模式
+    const hasSensitivePatterns = /password|secret|token|api_key|private_key/i.test(content);
+    checks.push({
+        name: '敏感信息检查',
+        status: hasSensitivePatterns ? 'warning' : 'passed',
+        message: hasSensitivePatterns ? '包含敏感信息相关词汇' : '未发现敏感信息模式',
+    });
+
+    // 根据检查结果和预设等级确定最终等级
+    const warningCount = checks.filter(c => c.status === 'warning').length;
+    const finalLevel = warningCount > 2 ? Math.min(level, 1) : level;
+
+    const report = {
+        scanned_at: now,
+        version: '1.0.0',
+        level: finalLevel,
+        checks,
+        permissions: [],
+    };
+
+    return JSON.stringify(report);
 }
 
 /**
