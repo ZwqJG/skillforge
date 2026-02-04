@@ -51,10 +51,6 @@ export default async function SkillPage({ params }: SkillPageProps) {
                         <span>⭐</span>
                         <span>{formatNumber(skill.github_stars)}</span>
                     </span>
-                    <span className="flex items-center gap-1.5">
-                        <span>📥</span>
-                        <span>{formatNumber(skill.install_count)} 安装</span>
-                    </span>
                     <a
                         href={skill.github_url}
                         target="_blank"

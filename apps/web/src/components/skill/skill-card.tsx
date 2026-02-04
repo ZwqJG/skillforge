@@ -42,10 +42,6 @@ export function SkillCard({ skill }: SkillCardProps) {
                     <span>⭐</span>
                     <span>{formatNumber(skill.github_stars)}</span>
                 </span>
-                <span className="flex items-center gap-1">
-                    <span>📥</span>
-                    <span>{formatNumber(skill.install_count)}</span>
-                </span>
                 <span className="text-[var(--gray-400)]">by {skill.author}</span>
             </div>
         </Link>

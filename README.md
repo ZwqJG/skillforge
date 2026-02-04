@@ -1,105 +1,106 @@
-# SkillForge
+<p align="center">
+  <img src="apps/web/public/logo.svg" width="80" alt="SkillForge Logo" />
+</p>
 
-> 安全可信的 Skill 精选平台
+<h1 align="center">SkillForge</h1>
 
-SkillForge（技能工坊）是一个 AI Agent Skills 的发现和安装平台，帮助用户找到高质量、安全可信的 Skills。
+<p align="center">
+  <strong>安全可信的 AI Agent Skill 精选平台</strong>
+</p>
 
-## 特性
+<p align="center">
+  <a href="https://skillforge.dev">访问官网</a> ·
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#为什么选择-skillforge">为什么选择我们</a>
+</p>
 
-- 🔒 **安全审核** - 所有 Skill 经过安全扫描和审核
-- 🔍 **智能搜索** - 关键词搜索 + 分类筛选
-- 📦 **一键安装** - CLI 工具支持多平台
-- 🌍 **全球用户** - 面向世界用户，中英双语
+---
+
+## 这是什么？
+
+**SkillForge（技能工坊）** 是一个帮助你发现和安装 AI Agent Skills 的平台。
+
+Skill 是用来增强 AI 编程助手（如 Cursor、Claude Code、Windsurf 等）能力的配置文件。通过安装不同的 Skills，你可以让 AI 助手更好地理解你的项目、遵循最佳实践、自动执行复杂任务。
 
 ## 快速开始
 
-### 安装 Skill
+### 🔍 发现 Skill
+
+访问 [skillforge.dev](https://skillforge.dev)，浏览和搜索你需要的 Skills：
+
+- **开发工具** - React、Vue、Next.js 最佳实践
+- **代码质量** - ESLint、TypeScript 规范
+- **工作流** - Git、CI/CD、部署自动化
+- **写作辅助** - 文档生成、翻译润色
+
+### 📦 安装 Skill
+
+找到心仪的 Skill 后，只需一条命令：
 
 ```bash
 npx skillforge add <skill-name>
 ```
 
-### CLI 命令
+例如，安装 React 最佳实践 Skill：
 
 ```bash
-# 搜索
-skillforge search "react"
-
-# 安装
-skillforge add react-best-practices
-
-# 列出已安装
-skillforge list
-
-# 卸载
-skillforge remove <skill-name>
+npx skillforge add react-best-practices
 ```
 
-## 项目结构
+### ✅ 开始使用
 
-```
-skillforge/
-├── apps/
-│   └── web/              # Next.js 网站
-├── packages/
-│   └── cli/              # CLI 工具
-├── scripts/
-│   ├── crawlers/         # 数据爬取脚本
-│   └── schema.sql        # 数据库 Schema
-└── docs/                 # 项目文档
-```
+安装完成！Skill 会自动配置到你的项目中，AI 助手会立即获得新能力。
 
-## 本地开发
+## 为什么选择 SkillForge？
 
-### 1. 启动网站
+### 🛡️ 安全可信
 
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+每个 Skill 都经过多层安全审核：
 
-访问 http://localhost:3000
+- **AI 自动扫描** - 检测危险命令、敏感路径访问
+- **安全等级标识** - 清晰展示每个 Skill 的安全级别
+- **开源透明** - 所有 Skill 源码公开可查
 
-### 2. 构建 CLI
+### 🎯 精选高质量
 
-```bash
-cd packages/cli
-npm install
-npm run build
-```
+我们不做简单的聚合，而是精选真正有价值的 Skills：
 
-### 3. 爬取数据
+- 社区验证的优质内容
+- 持续更新的活跃项目
+- 详细的使用说明和示例
 
-```bash
-cd scripts
-npm install
-npx tsx seed.ts crawl
-```
+### ⚡ 一键安装
 
-## 技术栈
+告别复杂配置，开箱即用：
 
-- **前端**: Next.js 16 + Tailwind CSS
-- **后端**: Next.js API Routes
-- **数据库**: Supabase (PostgreSQL)
-- **AI**: 通义千问
-- **部署**: Vercel
+- 跨平台支持（Mac / Windows / Linux）
+- 智能适配不同 AI 编程助手
+- 自动管理 Skill 版本更新
 
-## 环境变量
+## 常用命令
 
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+| 命令 | 说明 |
+|------|------|
+| `npx skillforge add <name>` | 安装 Skill |
+| `npx skillforge remove <name>` | 卸载 Skill |
+| `npx skillforge list` | 查看已安装 |
+| `npx skillforge search <keyword>` | 搜索 Skill |
 
-# 通义千问
-DASHSCOPE_API_KEY=
+## 贡献你的 Skill
 
-# GitHub
-GITHUB_TOKEN=
-```
+我们欢迎社区贡献！如果你创建了有用的 Skill，可以提交到平台分享给其他用户。
 
-## License
+1. 在你的 GitHub 仓库根目录创建 `SKILL.md` 文件
+2. 访问 [skillforge.dev/submit](https://skillforge.dev/submit) 提交审核
+3. 通过审核后，你的 Skill 将上架平台
 
-MIT
+## 联系我们
+
+- 🌐 官网：[skillforge.dev](https://skillforge.dev)
+- 💬 GitHub：[github.com/ZwqJG/skillforge](https://github.com/ZwqJG/skillforge)
+
+---
+
+<p align="center">
+  <sub>Made with ❤️ by SkillForge Team</sub>
+</p>

@@ -22,7 +22,8 @@ export function CopyButton({ text }: CopyButtonProps) {
     return (
         <button
             onClick={handleCopy}
-            className="px-4 py-2 bg-[var(--foreground)] text-[var(--background)] rounded font-medium text-sm hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: '#000', color: '#fff' }}
+            className="px-4 py-2 rounded font-medium text-sm hover:opacity-80 transition-opacity"
         >
             {copied ? '已复制 ✓' : '复制'}
         </button>
