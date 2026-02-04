@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://skillforge.dev">访问官网</a> ·
+  <a href="https://skillforge-20splltpu-jjs-projects-ea69f1c9.vercel.app">访问官网</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#为什么选择-skillforge">为什么选择我们</a>
 </p>
@@ -26,7 +26,7 @@ Skill 是用来增强 AI 编程助手（如 Cursor、Claude Code、Windsurf 等�
 
 ### 🔍 发现 Skill
 
-访问 [skillforge.dev](https://skillforge.dev)，浏览和搜索你需要的 Skills：
+访问 [skillforge.dev](https://skillforge-20splltpu-jjs-projects-ea69f1c9.vercel.app)，浏览和搜索你需要的 Skills：
 
 - **开发工具** - React、Vue、Next.js 最佳实践
 - **代码质量** - ESLint、TypeScript 规范
@@ -91,12 +91,12 @@ npx skillforge add react-best-practices
 我们欢迎社区贡献！如果你创建了有用的 Skill，可以提交到平台分享给其他用户。
 
 1. 在你的 GitHub 仓库根目录创建 `SKILL.md` 文件
-2. 访问 [skillforge.dev/submit](https://skillforge.dev/submit) 提交审核
+2. 访问 [skillforge.dev/submit](https://skillforge-20splltpu-jjs-projects-ea69f1c9.vercel.app/submit) 提交审核
 3. 通过审核后，你的 Skill 将上架平台
 
 ## 联系我们
 
-- 🌐 官网：[skillforge.dev](https://skillforge.dev)
+- 🌐 官网：[skillforge.dev](https://skillforge-20splltpu-jjs-projects-ea69f1c9.vercel.app)
 - 💬 GitHub：[github.com/ZwqJG/skillforge](https://github.com/ZwqJG/skillforge)
 
 ---
