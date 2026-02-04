@@ -16,6 +16,8 @@ const MOCK_SKILLS: Skill[] = [
         tags: ['art', 'generative', 'creative'],
         platforms: ['claude-code', 'cursor', 'universal'],
         security_level: 3,
+        security_report: null,
+        last_scanned_at: null,
         skill_md_content: '# Algorithmic Art\n\nCreate beautiful generative art...',
         usage_guide: '## Usage\n\nInstall and use with your agent.',
         author: 'anthropics',

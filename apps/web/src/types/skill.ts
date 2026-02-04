@@ -2,18 +2,18 @@
 
 export type SecurityLevel = 0 | 1 | 2 | 3;
 
-export type Category = 
-  | 'development' 
-  | 'operations' 
-  | 'design' 
-  | 'office' 
-  | 'marketing' 
+export type Category =
+  | 'development'
+  | 'operations'
+  | 'design'
+  | 'office'
+  | 'marketing'
   | 'creative';
 
-export type Platform = 
-  | 'claude-code' 
-  | 'cursor' 
-  | 'codex' 
+export type Platform =
+  | 'claude-code'
+  | 'cursor'
+  | 'codex'
   | 'opencode'
   | 'universal';
 
@@ -40,27 +40,27 @@ export interface Skill {
   github_url: string;
   github_stars: number;
   install_count: number;
-  
+
   // 分类
   category: Category;
   tags: string[];
   platforms: Platform[];
-  
+
   // 安全
   security_level: SecurityLevel;
-  security_report: SecurityReport | null;
-  last_scanned_at: string | null;
-  
+  security_report?: SecurityReport | null;
+  last_scanned_at?: string | null;
+
   // 内容
   skill_md_content: string;
   usage_guide: string;
-  
+
   // 元数据
   author: string;
   license: string;
   version: string;
   source: 'skills.sh' | 'skillhub' | 'github' | 'manual';
-  
+
   created_at: string;
   updated_at: string;
 }
