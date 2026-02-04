@@ -975,6 +975,50 @@ export async function getSkills(params: GetSkillsParams = {}): Promise<GetSkills
 }
 
 export async function getSkillBySlug(slug: string): Promise<Skill | null> {
+    // 尝试从 Supabase 读取
+    const { supabase } = await import('./supabase');
+
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('skills')
+                .select('*')
+                .eq('slug', slug)
+                .single();
+
+            if (!error && data) {
+                // 转换数据格式
+                return {
+                    id: data.id,
+                    name: data.name,
+                    slug: data.slug,
+                    description: data.description || '',
+                    summary: data.summary || '',
+                    github_url: data.github_url || '',
+                    github_stars: data.github_stars || 0,
+                    install_count: data.install_count || 0,
+                    category: data.category as Category,
+                    tags: data.tags || [],
+                    platforms: (data.platforms || ['universal']) as Platform[],
+                    security_level: (data.security_level || 0) as SecurityLevel,
+                    security_report: data.security_report || null,
+                    last_scanned_at: data.last_scanned_at || null,
+                    skill_md_content: data.skill_md_content || '',
+                    usage_guide: data.usage_guide || '',
+                    author: data.author || '',
+                    license: data.license || '',
+                    version: data.version || '1.0.0',
+                    source: (data.source || 'github') as Skill['source'],
+                    created_at: data.created_at || new Date().toISOString(),
+                    updated_at: data.updated_at || new Date().toISOString(),
+                };
+            }
+        } catch (e) {
+            console.error('Supabase query failed:', e);
+        }
+    }
+
+    // 回退到 Mock 数据
     const skill = MOCK_SKILLS.find(s => s.slug === slug);
     return skill || null;
 }
