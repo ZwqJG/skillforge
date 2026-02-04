@@ -5,6 +5,9 @@ import { CopyButton } from '@/components/ui/copy-button';
 import { SkillTabs } from '@/components/skill/skill-tabs';
 import { Metadata } from 'next';
 
+// 强制动态渲染，确保每次请求时从 Supabase 获取最新数据
+export const dynamic = 'force-dynamic';
+
 interface SkillPageProps {
     params: Promise<{ slug: string }>;
 }
