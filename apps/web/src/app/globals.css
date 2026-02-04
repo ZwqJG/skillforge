@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+:root {
+  /* 极简黑白主题 */
+  --background: #ffffff;
+  --foreground: #000000;
+
+  /* 灰度色阶 */
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #404040;
+  --gray-800: #262626;
+  --gray-900: #171717;
+
+  /* 安全等级颜色 */
+  --security-3: #16a34a;
+  /* 官方认证 - 绿色 */
+  --security-2: #2563eb;
+  /* 已审核 - 蓝色 */
+  --security-1: #eab308;
+  /* 社区验证 - 黄色 */
+  --security-0: #a3a3a3;
+  /* 未审核 - 灰色 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ffffff;
+
+    --gray-50: #171717;
+    --gray-100: #262626;
+    --gray-200: #404040;
+    --gray-300: #525252;
+    --gray-400: #737373;
+    --gray-500: #a3a3a3;
+    --gray-600: #d4d4d4;
+    --gray-700: #e5e5e5;
+    --gray-800: #f5f5f5;
+    --gray-900: #fafafa;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 极简链接样式 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 极简按钮基础样式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--foreground);
+  color: var(--background);
+  border: 1px solid var(--foreground);
+}
+
+.btn-primary:hover {
+  opacity: 0.8;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--gray-300);
+}
+
+.btn-outline:hover {
+  border-color: var(--foreground);
+}
+
+/* 代码块样式 */
+.code-block {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+
+/* 安全等级徽章 */
+.badge-security-3 {
+  background: var(--security-3);
+  color: white;
+}
+
+.badge-security-2 {
+  background: var(--security-2);
+  color: white;
+}
+
+.badge-security-1 {
+  background: var(--security-1);
+  color: black;
+}
+
+.badge-security-0 {
+  background: var(--security-0);
+  color: white;
+}
