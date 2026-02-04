@@ -978,6 +978,8 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
     // 尝试从 Supabase 读取
     const { supabase } = await import('./supabase');
 
+    console.log('[getSkillBySlug] slug:', slug, 'supabase:', !!supabase);
+
     if (supabase) {
         try {
             const { data, error } = await supabase
@@ -986,7 +988,10 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
                 .eq('slug', slug)
                 .single();
 
+            console.log('[getSkillBySlug] Supabase response:', { hasData: !!data, error: error?.message });
+
             if (!error && data) {
+                console.log('[getSkillBySlug] Using Supabase data, usage_guide length:', data.usage_guide?.length || 0);
                 // 转换数据格式
                 return {
                     id: data.id,
@@ -1019,6 +1024,7 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
     }
 
     // 回退到 Mock 数据
+    console.log('[getSkillBySlug] Falling back to mock data');
     const skill = MOCK_SKILLS.find(s => s.slug === slug);
     return skill || null;
 }
