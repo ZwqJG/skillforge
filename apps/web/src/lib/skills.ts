@@ -921,6 +921,93 @@ export async function getSkills(params: GetSkillsParams = {}): Promise<GetSkills
         page_size = 12,
     } = params;
 
+    // 尝试从 Supabase 读取
+    const { supabase } = await import('./supabase');
+
+    if (supabase) {
+        try {
+            let query = supabase.from('skills').select('*', { count: 'exact' });
+
+            // 搜索过滤
+            if (q) {
+                query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+            }
+
+            // 分类过滤
+            if (category) {
+                query = query.eq('category', category);
+            }
+
+            // 安全等级过滤
+            if (security_level !== undefined) {
+                query = query.eq('security_level', security_level);
+            }
+
+            // 排序
+            switch (sort) {
+                case 'stars':
+                    query = query.order('github_stars', { ascending: false });
+                    break;
+                case 'installs':
+                    query = query.order('install_count', { ascending: false });
+                    break;
+                case 'recent':
+                    query = query.order('updated_at', { ascending: false });
+                    break;
+            }
+
+            // 分页
+            const start = (page - 1) * page_size;
+            query = query.range(start, start + page_size - 1);
+
+            const { data, error, count } = await query;
+
+            if (!error && data) {
+                const skills: Skill[] = data.map((d: any) => ({
+                    id: d.id,
+                    name: d.name,
+                    slug: d.slug,
+                    description: d.description || '',
+                    summary: d.summary || '',
+                    github_url: d.github_url || '',
+                    github_stars: d.github_stars || 0,
+                    install_count: d.install_count || 0,
+                    category: d.category as Category,
+                    tags: d.tags || [],
+                    platforms: (d.platforms || ['universal']) as Platform[],
+                    security_level: (d.security_level || 0) as SecurityLevel,
+                    security_report: d.security_report || null,
+                    last_scanned_at: d.last_scanned_at || null,
+                    skill_md_content: d.skill_md_content || '',
+                    usage_guide: d.usage_guide || '',
+                    author: d.author || '',
+                    license: d.license || '',
+                    version: d.version || '1.0.0',
+                    source: (d.source || 'github') as Skill['source'],
+                    created_at: d.created_at || new Date().toISOString(),
+                    updated_at: d.updated_at || new Date().toISOString(),
+                }));
+
+                // 平台过滤（Supabase 不支持数组包含查询，在客户端过滤）
+                let filteredSkills = skills;
+                if (platform) {
+                    filteredSkills = skills.filter(s => s.platforms.includes(platform));
+                }
+
+                return {
+                    skills: filteredSkills,
+                    total: count || filteredSkills.length,
+                    page,
+                    page_size,
+                };
+            }
+        } catch (e) {
+            console.error('Supabase getSkills failed:', e);
+        }
+    }
+
+    // 回退到 Mock 数据
+    console.log('[getSkills] Falling back to mock data');
     let filtered = [...MOCK_SKILLS];
 
     // 搜索过滤
@@ -1030,12 +1117,95 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
 }
 
 export async function getHotSkills(limit = 6): Promise<Skill[]> {
+    const { supabase } = await import('./supabase');
+
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('skills')
+                .select('*')
+                .order('github_stars', { ascending: false })
+                .limit(limit);
+
+            if (!error && data) {
+                return data.map((d: any) => ({
+                    id: d.id,
+                    name: d.name,
+                    slug: d.slug,
+                    description: d.description || '',
+                    summary: d.summary || '',
+                    github_url: d.github_url || '',
+                    github_stars: d.github_stars || 0,
+                    install_count: d.install_count || 0,
+                    category: d.category as Category,
+                    tags: d.tags || [],
+                    platforms: (d.platforms || ['universal']) as Platform[],
+                    security_level: (d.security_level || 0) as SecurityLevel,
+                    security_report: d.security_report || null,
+                    last_scanned_at: d.last_scanned_at || null,
+                    skill_md_content: d.skill_md_content || '',
+                    usage_guide: d.usage_guide || '',
+                    author: d.author || '',
+                    license: d.license || '',
+                    version: d.version || '1.0.0',
+                    source: (d.source || 'github') as Skill['source'],
+                    created_at: d.created_at || new Date().toISOString(),
+                    updated_at: d.updated_at || new Date().toISOString(),
+                }));
+            }
+        } catch (e) {
+            console.error('Supabase getHotSkills failed:', e);
+        }
+    }
+
     return [...MOCK_SKILLS]
         .sort((a, b) => b.github_stars - a.github_stars)
         .slice(0, limit);
 }
 
 export async function getSkillsByCategory(category: Category, limit = 6): Promise<Skill[]> {
+    const { supabase } = await import('./supabase');
+
+    if (supabase) {
+        try {
+            const { data, error } = await supabase
+                .from('skills')
+                .select('*')
+                .eq('category', category)
+                .order('github_stars', { ascending: false })
+                .limit(limit);
+
+            if (!error && data) {
+                return data.map((d: any) => ({
+                    id: d.id,
+                    name: d.name,
+                    slug: d.slug,
+                    description: d.description || '',
+                    summary: d.summary || '',
+                    github_url: d.github_url || '',
+                    github_stars: d.github_stars || 0,
+                    install_count: d.install_count || 0,
+                    category: d.category as Category,
+                    tags: d.tags || [],
+                    platforms: (d.platforms || ['universal']) as Platform[],
+                    security_level: (d.security_level || 0) as SecurityLevel,
+                    security_report: d.security_report || null,
+                    last_scanned_at: d.last_scanned_at || null,
+                    skill_md_content: d.skill_md_content || '',
+                    usage_guide: d.usage_guide || '',
+                    author: d.author || '',
+                    license: d.license || '',
+                    version: d.version || '1.0.0',
+                    source: (d.source || 'github') as Skill['source'],
+                    created_at: d.created_at || new Date().toISOString(),
+                    updated_at: d.updated_at || new Date().toISOString(),
+                }));
+            }
+        } catch (e) {
+            console.error('Supabase getSkillsByCategory failed:', e);
+        }
+    }
+
     return MOCK_SKILLS
         .filter(s => s.category === category)
         .sort((a, b) => b.github_stars - a.github_stars)
