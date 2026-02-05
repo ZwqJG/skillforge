@@ -2,8 +2,55 @@ import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
-import { detectPlatform, getSkillsDir, ensureDir, PLATFORMS } from '../utils/platform.js';
+import { detectPlatformEntries, getSkillsDir, ensureDir, PLATFORMS, Platform, PlatformEntry } from '../utils/platform.js';
 import { getSkillInfo, getSkillFromGitHub, logInstall } from '../utils/api.js';
+import { createInterface } from 'node:readline/promises';
+
+async function promptForPlatform(entries: PlatformEntry[]): Promise<Platform> {
+    console.log(chalk.yellow('检测到多个平台:'));
+    entries.forEach((entry, index) => {
+        console.log(`  ${index + 1}) ${entry.platform.name} (${entry.key})`);
+    });
+    console.log(chalk.gray(`也可以使用 --target <platform> 跳过选择，例如: --target ${entries[0].key}`));
+
+    if (!process.stdin.isTTY) {
+        console.log(chalk.gray('当前环境不可交互，默认选择第一个平台'));
+        return entries[0].platform;
+    }
+
+    const rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    try {
+        while (true) {
+            const answer = await rl.question(`请选择安装目标 [1-${entries.length}]: `);
+            const index = Number(answer.trim());
+            if (Number.isInteger(index) && index >= 1 && index <= entries.length) {
+                return entries[index - 1].platform;
+            }
+            console.log(chalk.yellow('输入无效，请输入有效的数字。'));
+        }
+    } finally {
+        rl.close();
+    }
+}
+
+async function resolvePlatform(options: AddOptions): Promise<Platform> {
+    if (options.target) {
+        return PLATFORMS[options.target] || PLATFORMS['universal'];
+    }
+
+    const entries = detectPlatformEntries();
+    if (entries.length === 0) {
+        return PLATFORMS['universal'];
+    }
+    if (entries.length === 1) {
+        return entries[0].platform;
+    }
+    return await promptForPlatform(entries);
+}
 
 interface AddOptions {
     target?: string;
@@ -48,9 +95,7 @@ export async function add(skill: string, options: AddOptions) {
         console.log('');
 
         // 选择目标平台
-        const platform = options.target
-            ? PLATFORMS[options.target] || PLATFORMS['universal']
-            : detectPlatform();
+        const platform = await resolvePlatform(options);
 
         console.log(chalk.gray(`目标平台: ${platform.name}`));
 

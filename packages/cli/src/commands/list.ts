@@ -24,7 +24,7 @@ export async function list() {
     if (skills.length === 0) {
         console.log(chalk.gray('暂无安装的 Skills'));
         console.log('');
-        console.log(chalk.gray('使用 skillforge add <skill-name> 安装'));
+        console.log(chalk.gray('使用 npx @skillforge/cli add <skill-name> 安装'));
         return;
     }
 

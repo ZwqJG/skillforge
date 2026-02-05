@@ -60,10 +60,10 @@
 ### Phase 5: CLI 工具（Day 10-12）✅
 
 - [x] CLI 项目初始化
-- [x] `skillforge add` 命令
-- [x] `skillforge list` 命令
-- [x] `skillforge remove` 命令
-- [x] `skillforge search` 命令
+- [x] `npx @skillforge/cli add` 命令
+- [x] `npx @skillforge/cli list` 命令
+- [x] `npx @skillforge/cli remove` 命令
+- [x] `npx @skillforge/cli search` 命令
 - [x] 多平台检测与适配
 - [ ] 发布到 npm
 

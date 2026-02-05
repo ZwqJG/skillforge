@@ -51,7 +51,7 @@
 | **Skill 发现** | 关键词搜索 + 分类筛选 + GitHub Stars 排序 |
 | **Skill 详情页** | 标签、摘要、SKILL.md、使用说明、安全报告 |
 | **安全审核系统** | 自动化扫描 + 4 级安全等级 |
-| **一键安装 CLI** | `skillforge add <name>` 支持多平台 |
+| **一键安装 CLI** | `npx @skillforge/cli add <name>` 支持多平台 |
 | **数据爬取** | 聚合竞品高质量 Skill |
 | **极简 UI** | 黑白风格 |
 
@@ -102,7 +102,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │  📦 一键安装                                                │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │ npx skillforge add seo-audit                        │   │
+│  │ npx @skillforge/cli add seo-audit                   │   │
 │  └─────────────────────────────────────────────────────┘   │
 │  支持：Claude Code | Cursor | Codex | OpenCode             │
 ├─────────────────────────────────────────────────────────────┤
@@ -143,8 +143,8 @@
 npm install -g skillforge
 
 # 添加 Skill
-skillforge add <skill-name>
-skillforge add <github-user/repo>
+npx @skillforge/cli add <skill-name>
+npx @skillforge/cli add <github-user/repo>
 
 # 列出已安装
 skillforge list
@@ -160,12 +160,12 @@ skillforge search "SEO"
 
 ```bash
 # 自动检测当前环境
-skillforge add seo-audit
+npx @skillforge/cli add seo-audit
 
 # 或指定目标平台
-skillforge add seo-audit --target claude-code
-skillforge add seo-audit --target cursor
-skillforge add seo-audit --target codex
+npx @skillforge/cli add seo-audit --target claude-code
+npx @skillforge/cli add seo-audit --target cursor
+npx @skillforge/cli add seo-audit --target codex
 ```
 
 ---

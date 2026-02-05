@@ -8,6 +8,11 @@ export interface Platform {
     configFile?: string;
 }
 
+export interface PlatformEntry {
+    key: string;
+    platform: Platform;
+}
+
 // 支持的平台配置
 export const PLATFORMS: Record<string, Platform> = {
     'claude-code': {
@@ -34,31 +39,47 @@ export const PLATFORMS: Record<string, Platform> = {
 };
 
 /**
- * 检测当前环境的平台
+ * 检测当前环境的所有平台
  */
-export function detectPlatform(): Platform {
+export function detectPlatformEntries(): PlatformEntry[] {
+    const entries: PlatformEntry[] = [];
+
     // 检查 Claude Code
     const claudeDir = path.join(os.homedir(), '.claude');
     if (fs.existsSync(claudeDir)) {
-        return PLATFORMS['claude-code'];
+        entries.push({ key: 'claude-code', platform: PLATFORMS['claude-code'] });
     }
 
     // 检查 Cursor（项目级）
     if (fs.existsSync('.cursor')) {
-        return PLATFORMS['cursor'];
+        entries.push({ key: 'cursor', platform: PLATFORMS['cursor'] });
     }
 
     // 检查 Codex
     if (fs.existsSync('.codex')) {
-        return PLATFORMS['codex'];
+        entries.push({ key: 'codex', platform: PLATFORMS['codex'] });
     }
 
     // 检查 OpenCode
     if (fs.existsSync('.opencode')) {
-        return PLATFORMS['opencode'];
+        entries.push({ key: 'opencode', platform: PLATFORMS['opencode'] });
     }
 
-    // 默认使用通用目录
+    return entries;
+}
+
+export function detectPlatforms(): Platform[] {
+    return detectPlatformEntries().map(entry => entry.platform);
+}
+
+/**
+ * 检测当前环境的平台（返回单个）
+ */
+export function detectPlatform(): Platform {
+    const platforms = detectPlatforms();
+    if (platforms.length > 0) {
+        return platforms[0];
+    }
     return PLATFORMS['universal'];
 }
 

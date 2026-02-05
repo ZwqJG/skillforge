@@ -36,19 +36,30 @@ var PLATFORMS = {
     skillsDir: ".agent/skills"
   }
 };
-function detectPlatform() {
+function detectPlatformEntries() {
+  const entries = [];
   const claudeDir = path.join(os.homedir(), ".claude");
   if (fs.existsSync(claudeDir)) {
-    return PLATFORMS["claude-code"];
+    entries.push({ key: "claude-code", platform: PLATFORMS["claude-code"] });
   }
   if (fs.existsSync(".cursor")) {
-    return PLATFORMS["cursor"];
+    entries.push({ key: "cursor", platform: PLATFORMS["cursor"] });
   }
   if (fs.existsSync(".codex")) {
-    return PLATFORMS["codex"];
+    entries.push({ key: "codex", platform: PLATFORMS["codex"] });
   }
   if (fs.existsSync(".opencode")) {
-    return PLATFORMS["opencode"];
+    entries.push({ key: "opencode", platform: PLATFORMS["opencode"] });
+  }
+  return entries;
+}
+function detectPlatforms() {
+  return detectPlatformEntries().map((entry) => entry.platform);
+}
+function detectPlatform() {
+  const platforms = detectPlatforms();
+  if (platforms.length > 0) {
+    return platforms[0];
   }
   return PLATFORMS["universal"];
 }
@@ -141,6 +152,47 @@ async function logInstall(skillId, platform) {
 }
 
 // src/commands/add.ts
+import { createInterface } from "readline/promises";
+async function promptForPlatform(entries) {
+  console.log(chalk.yellow("\u68C0\u6D4B\u5230\u591A\u4E2A\u5E73\u53F0:"));
+  entries.forEach((entry, index) => {
+    console.log(`  ${index + 1}) ${entry.platform.name} (${entry.key})`);
+  });
+  console.log(chalk.gray(`\u4E5F\u53EF\u4EE5\u4F7F\u7528 --target <platform> \u8DF3\u8FC7\u9009\u62E9\uFF0C\u4F8B\u5982: --target ${entries[0].key}`));
+  if (!process.stdin.isTTY) {
+    console.log(chalk.gray("\u5F53\u524D\u73AF\u5883\u4E0D\u53EF\u4EA4\u4E92\uFF0C\u9ED8\u8BA4\u9009\u62E9\u7B2C\u4E00\u4E2A\u5E73\u53F0"));
+    return entries[0].platform;
+  }
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  try {
+    while (true) {
+      const answer = await rl.question(`\u8BF7\u9009\u62E9\u5B89\u88C5\u76EE\u6807 [1-${entries.length}]: `);
+      const index = Number(answer.trim());
+      if (Number.isInteger(index) && index >= 1 && index <= entries.length) {
+        return entries[index - 1].platform;
+      }
+      console.log(chalk.yellow("\u8F93\u5165\u65E0\u6548\uFF0C\u8BF7\u8F93\u5165\u6709\u6548\u7684\u6570\u5B57\u3002"));
+    }
+  } finally {
+    rl.close();
+  }
+}
+async function resolvePlatform(options) {
+  if (options.target) {
+    return PLATFORMS[options.target] || PLATFORMS["universal"];
+  }
+  const entries = detectPlatformEntries();
+  if (entries.length === 0) {
+    return PLATFORMS["universal"];
+  }
+  if (entries.length === 1) {
+    return entries[0].platform;
+  }
+  return await promptForPlatform(entries);
+}
 var SECURITY_LABELS = {
   3: { label: "\u{1F6E1}\uFE0F \u5B98\u65B9\u8BA4\u8BC1", color: chalk.green },
   2: { label: "\u2705 \u5DF2\u5BA1\u6838", color: chalk.blue },
@@ -168,7 +220,7 @@ async function add(skill, options) {
     const security = SECURITY_LABELS[skillInfo.security_level];
     console.log(`  \u{1F512} ${security.color(security.label)}`);
     console.log("");
-    const platform = options.target ? PLATFORMS[options.target] || PLATFORMS["universal"] : detectPlatform();
+    const platform = await resolvePlatform(options);
     console.log(chalk.gray(`\u76EE\u6807\u5E73\u53F0: ${platform.name}`));
     const skillsDir = getSkillsDir(platform);
     const skillDir = path2.join(skillsDir, skillInfo.slug);
@@ -227,7 +279,7 @@ async function list() {
   if (skills.length === 0) {
     console.log(chalk2.gray("\u6682\u65E0\u5B89\u88C5\u7684 Skills"));
     console.log("");
-    console.log(chalk2.gray("\u4F7F\u7528 skillforge add <skill-name> \u5B89\u88C5"));
+    console.log(chalk2.gray("\u4F7F\u7528 npx @skillforge/cli add <skill-name> \u5B89\u88C5"));
     return;
   }
   for (const skill of skills) {
@@ -317,7 +369,7 @@ async function search(query, options) {
       console.log(`    \u2B50 ${skill.github_stars.toLocaleString()}  \u{1F4E5} ${skill.install_count.toLocaleString()}  \u{1F464} ${skill.author}`);
       console.log("");
     }
-    console.log(chalk4.gray("\u4F7F\u7528 skillforge add <skill-name> \u5B89\u88C5"));
+    console.log(chalk4.gray("\u4F7F\u7528 npx @skillforge/cli add <skill-name> \u5B89\u88C5"));
   } catch (error) {
     spinner.fail("\u641C\u7D22\u5931\u8D25");
     console.error(chalk4.red(error instanceof Error ? error.message : String(error)));

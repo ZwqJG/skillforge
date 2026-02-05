@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { buildInstallCommand } from '@/lib/skills';
 
 // 支持的 10 个 AI 编程代理商
 const SUPPORTED_TOOLS = [
@@ -89,7 +90,7 @@ const SUPPORTED_TOOLS = [
 
 export function InstallSection() {
     const [copied, setCopied] = useState(false);
-    const installCommand = 'npx skillforge add <owner/repo>';
+    const installCommand = buildInstallCommand('<owner/repo>');
 
     const handleCopy = async () => {
         try {

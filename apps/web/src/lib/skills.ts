@@ -1,5 +1,11 @@
 import { Skill, Category, Platform, SecurityLevel } from '@/types';
 
+export const CLI_NPX_NAME = process.env.NEXT_PUBLIC_SKILLFORGE_CLI_NAME ?? '@skillforge/cli';
+
+export function buildInstallCommand(slugOrRepo: string): string {
+    return `npx ${CLI_NPX_NAME} add ${slugOrRepo}`;
+}
+
 // 真实爬取的 Skills 数据
 const MOCK_SKILLS: Skill[] = [
     // === Anthropic 官方 (Level 3) ===

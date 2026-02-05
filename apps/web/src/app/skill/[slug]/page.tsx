@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getSkillBySlug } from '@/lib/skills';
+import { buildInstallCommand, getSkillBySlug } from '@/lib/skills';
 import { SecurityBadge } from '@/components/ui/security-badge';
 import { CopyButton } from '@/components/ui/copy-button';
 import { SkillTabs } from '@/components/skill/skill-tabs';
@@ -34,7 +34,7 @@ export default async function SkillPage({ params }: SkillPageProps) {
         notFound();
     }
 
-    const installCommand = `npx skillforge add ${skill.slug}`;
+    const installCommand = buildInstallCommand(skill.slug);
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
