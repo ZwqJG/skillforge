@@ -41,7 +41,7 @@ export async function search(query: string, options: SearchOptions) {
             console.log('');
         }
 
-        console.log(chalk.gray('使用 npx @skillforge/cli add <skill-name> 安装'));
+        console.log(chalk.gray('使用 npx skillforge-cli add <skill-name> 安装'));
 
     } catch (error) {
         spinner.fail('搜索失败');

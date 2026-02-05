@@ -57,7 +57,7 @@ description: React 开发最佳实践指南
 
 1. 安装 Skill：
 \`\`\`bash
-npx @skillforge/cli add react-best-practices
+npx skillforge-cli add react-best-practices
 \`\`\`
 
 2. 在 Claude Code 中，当你编写 React 代码时，Claude 会自动参考这些最佳实践给出建议。
