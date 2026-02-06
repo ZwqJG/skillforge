@@ -38,13 +38,13 @@ Skill 是用来增强 AI 编程助手（如 Cursor、Claude Code、Windsurf 等�
 找到心仪的 Skill 后，只需一条命令：
 
 ```bash
-npx skillforge-cli add <skill-name>
+npx skillforge-tools add <skill-name>
 ```
 
 例如，安装 React 最佳实践 Skill：
 
 ```bash
-npx skillforge-cli add react-best-practices
+npx skillforge-tools add react-best-practices
 ```
 
 ### ✅ 开始使用
@@ -81,10 +81,10 @@ npx skillforge-cli add react-best-practices
 
 | 命令 | 说明 |
 |------|------|
-| `npx skillforge-cli add <name>` | 安装 Skill |
-| `npx skillforge-cli remove <name>` | 卸载 Skill |
-| `npx skillforge-cli list` | 查看已安装 |
-| `npx skillforge-cli search <keyword>` | 搜索 Skill |
+| `npx skillforge-tools add <name>` | 安装 Skill |
+| `npx skillforge-tools remove <name>` | 卸载 Skill |
+| `npx skillforge-tools list` | 查看已安装 |
+| `npx skillforge-tools search <keyword>` | 搜索 Skill |
 
 ## 贡献你的 Skill
 

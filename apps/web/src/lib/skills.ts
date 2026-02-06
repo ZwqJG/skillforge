@@ -1,6 +1,6 @@
 import { Skill, Category, Platform, SecurityLevel } from '@/types';
 
-export const CLI_NPX_NAME = process.env.NEXT_PUBLIC_SKILLFORGE_CLI_NAME ?? 'skillforge-cli';
+export const CLI_NPX_NAME = process.env.NEXT_PUBLIC_SKILLFORGE_CLI_NAME ?? 'skillforge-tools';
 
 export function buildInstallCommand(slugOrRepo: string): string {
     return `npx ${CLI_NPX_NAME} add ${slugOrRepo}`;

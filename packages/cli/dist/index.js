@@ -279,7 +279,7 @@ async function list() {
   if (skills.length === 0) {
     console.log(chalk2.gray("\u6682\u65E0\u5B89\u88C5\u7684 Skills"));
     console.log("");
-    console.log(chalk2.gray("\u4F7F\u7528 npx skillforge-cli add <skill-name> \u5B89\u88C5"));
+    console.log(chalk2.gray("\u4F7F\u7528 npx skillforge-tools add <skill-name> \u5B89\u88C5"));
     return;
   }
   for (const skill of skills) {
@@ -369,7 +369,7 @@ async function search(query, options) {
       console.log(`    \u2B50 ${skill.github_stars.toLocaleString()}  \u{1F4E5} ${skill.install_count.toLocaleString()}  \u{1F464} ${skill.author}`);
       console.log("");
     }
-    console.log(chalk4.gray("\u4F7F\u7528 npx skillforge-cli add <skill-name> \u5B89\u88C5"));
+    console.log(chalk4.gray("\u4F7F\u7528 npx skillforge-tools add <skill-name> \u5B89\u88C5"));
   } catch (error) {
     spinner.fail("\u641C\u7D22\u5931\u8D25");
     console.error(chalk4.red(error instanceof Error ? error.message : String(error)));
