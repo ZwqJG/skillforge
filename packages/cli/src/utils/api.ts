@@ -1,6 +1,6 @@
 // SkillForge API 配置
 // 开发时使用本地地址，生产环境使用 Vercel 部署地址
-export const API_BASE_URL = process.env.SKILLFORGE_API_URL || 'https://skillforge.vercel.app';
+export const API_BASE_URL = process.env.SKILLFORGE_API_URL || 'https://skillforge-rho.vercel.app';
 
 export interface SkillInfo {
     id: string;

@@ -73,7 +73,7 @@ export async function add(skill: string, options: AddOptions) {
 
         if (!skillInfo) {
             spinner.fail(`未找到 Skill: ${skill}`);
-            console.log(chalk.gray('提示: 使用 skillforge search <关键词> 搜索可用的 Skills'));
+            console.log(chalk.gray('提示: 使用 skillforge-tools search <关键词> 搜索可用的 Skills'));
             process.exit(1);
         }
 

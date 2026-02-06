@@ -85,7 +85,7 @@ function listSkillsInDir(dir) {
 }
 
 // src/utils/api.ts
-var API_BASE_URL = process.env.SKILLFORGE_API_URL || "https://skillforge.vercel.app";
+var API_BASE_URL = process.env.SKILLFORGE_API_URL || "https://skillforge-rho.vercel.app";
 async function getSkillInfo(slug) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/skills/${slug}`);
@@ -205,7 +205,7 @@ async function add(skill, options) {
     const skillInfo = await getSkillInfo(skill);
     if (!skillInfo) {
       spinner.fail(`\u672A\u627E\u5230 Skill: ${skill}`);
-      console.log(chalk.gray("\u63D0\u793A: \u4F7F\u7528 skillforge search <\u5173\u952E\u8BCD> \u641C\u7D22\u53EF\u7528\u7684 Skills"));
+      console.log(chalk.gray("\u63D0\u793A: \u4F7F\u7528 skillforge-tools search <\u5173\u952E\u8BCD> \u641C\u7D22\u53EF\u7528\u7684 Skills"));
       process.exit(1);
     }
     spinner.succeed("\u83B7\u53D6\u6210\u529F");
