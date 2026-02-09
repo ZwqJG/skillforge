@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="apps/web/public/logo.svg" width="80" alt="SkillForge Logo" />
-</p>
-
 <h1 align="center">SkillForge</h1>
 
 <p align="center">
