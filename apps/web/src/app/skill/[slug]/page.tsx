@@ -4,6 +4,7 @@ import { SecurityBadge } from '@/components/ui/security-badge';
 import { CopyButton } from '@/components/ui/copy-button';
 import { SkillTabs } from '@/components/skill/skill-tabs';
 import { Metadata } from 'next';
+import { SITE_URL, SITE_NAME } from '@/lib/site';
 
 // 强制动态渲染，确保每次请求时从 Supabase 获取最新数据
 export const dynamic = 'force-dynamic';
@@ -20,9 +21,27 @@ export async function generateMetadata({ params }: SkillPageProps): Promise<Meta
         return { title: 'Skill Not Found - SkillForge' };
     }
 
+    const canonical = `${SITE_URL}/skill/${skill.slug}`;
+
     return {
         title: `${skill.name} - SkillForge`,
         description: skill.description,
+        alternates: {
+            canonical,
+        },
+        openGraph: {
+            type: 'article',
+            url: canonical,
+            title: `${skill.name} - ${SITE_NAME}`,
+            description: skill.description,
+            siteName: SITE_NAME,
+            locale: 'zh_CN',
+        },
+        twitter: {
+            card: 'summary',
+            title: `${skill.name} - ${SITE_NAME}`,
+            description: skill.description,
+        },
     };
 }
 

@@ -3,6 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Header, Footer } from "@/components/ui/layout";
 import { AuthProvider } from "@/contexts/auth-context";
 import "./globals.css";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +21,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SkillForge - 安全可信的 Skill 精选平台",
-  description: "发现、安装和使用高质量的 AI Agent Skills。安全审核、一键安装、多平台支持。",
+  metadataBase: new URL(SITE_URL),
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
   keywords: ["skill", "agent", "claude", "cursor", "codex", "ai", "安全"],
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    siteName: SITE_NAME,
+    locale: "zh_CN",
+  },
+  twitter: {
+    card: "summary",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -41,4 +75,3 @@ export default function RootLayout({
     </html>
   );
 }
-

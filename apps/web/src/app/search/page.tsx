@@ -1,8 +1,10 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { SearchBar } from '@/components/ui/search-bar';
 import { SkillCard } from '@/components/skill/skill-card';
 import { getSkills } from '@/lib/skills';
 import { Category, SecurityLevel, Platform } from '@/types';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 interface SearchPageProps {
     searchParams: Promise<{
@@ -13,6 +15,52 @@ interface SearchPageProps {
         sort?: 'stars' | 'installs' | 'recent';
         page?: string;
     }>;
+}
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams?: {
+        q?: string;
+        category?: Category;
+    };
+}): Promise<Metadata> {
+    const query = searchParams?.q?.trim();
+    const category = searchParams?.category;
+    const title = query
+        ? `搜索「${query}」- ${SITE_NAME}`
+        : `搜索 Skills - ${SITE_NAME}`;
+    const description = query
+        ? `在 ${SITE_NAME} 搜索与 ${query} 相关的 AI Agent Skills。`
+        : `在 ${SITE_NAME} 浏览和筛选高质量的 AI Agent Skills。`;
+
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (category) params.set('category', category);
+    const canonical = params.toString()
+        ? `${SITE_URL}/search?${params.toString()}`
+        : `${SITE_URL}/search`;
+
+    return {
+        title,
+        description,
+        alternates: {
+            canonical,
+        },
+        openGraph: {
+            type: 'website',
+            url: canonical,
+            title,
+            description,
+            siteName: SITE_NAME,
+            locale: 'zh_CN',
+        },
+        twitter: {
+            card: 'summary',
+            title,
+            description,
+        },
+    };
 }
 
 const categories = [
