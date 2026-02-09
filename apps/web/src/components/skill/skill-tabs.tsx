@@ -52,10 +52,14 @@ export function SkillTabs({ skill }: SkillTabsProps) {
                 )}
 
                 {activeTab === 'skillmd' && (
-                    <div className="bg-[var(--gray-50)] border border-[var(--gray-200)] rounded-lg p-4 overflow-x-auto">
-                        <pre className="text-sm font-mono whitespace-pre-wrap">
-                            {skill.skill_md_content || '暂无 SKILL.md 内容'}
-                        </pre>
+                    <div className="prose prose-neutral max-w-none">
+                        {skill.skill_md_content ? (
+                            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(skill.skill_md_content) }} />
+                        ) : (
+                            <div className="text-[var(--gray-500)]">
+                                <p>暂无 SKILL.md 内容。</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -128,10 +132,19 @@ export function SkillTabs({ skill }: SkillTabsProps) {
 
 // 简单的 Markdown 转 HTML（生产环境建议使用 marked 或 remark）
 function markdownToHtml(markdown: string): string {
-    return markdown
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    let content = markdown.replace(/\r\n/g, '\n');
+
+    // Add dividers between sections (before H2/H3 except first line)
+    content = content.replace(/(^|\n)(##|###) /g, (match, start, level, offset) => {
+        if (offset === 0) return match;
+        return `\n<hr />\n${level} `;
+    });
+
+    return content
+        .replace(/^\s*---\s*$/gim, '<hr />')
+        .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold">$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold">$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
         .replace(/```(\w*)\n([\s\S]*?)```/gim, '<pre><code>$2</code></pre>')
