@@ -82,18 +82,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '无法获取仓库信息，请确认仓库是公开的' }, { status: 404 });
         }
 
-        // 6. 获取 SKILL.md
+        // 6. 获取 SKILL.md（不存在则回退 README.md）
         const skillMd = await fetchGitHubFile(owner, repo, 'SKILL.md');
-        if (!skillMd) {
-            return NextResponse.json({ error: '仓库中未找到 SKILL.md 文件' }, { status: 400 });
-        }
-
-        // 7. 获取 README.md（可选）
         const readme = await fetchGitHubFile(owner, repo, 'README.md') ||
             await fetchGitHubFile(owner, repo, 'readme.md') || '';
+        const skillContent = skillMd || readme;
+        if (!skillContent) {
+            return NextResponse.json({ error: '仓库中未找到 SKILL.md 或 README.md 文件' }, { status: 400 });
+        }
 
         // 8. AI 审核
-        const reviewResult = await aiReview(skillMd, readme, repoInfo);
+        const reviewResult = await aiReview(skillContent, readme, repoInfo);
 
         if (!reviewResult.passed) {
             return NextResponse.json({
@@ -104,7 +103,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 9. 解析 SKILL.md
-        const skillInfo = parseSkillMd(skillMd);
+        const skillInfo = parseSkillMd(skillContent);
 
         // 10. 生成 slug
         const slug = generateSlug(skillInfo.name || repoInfo.name);
@@ -141,7 +140,7 @@ export async function POST(request: NextRequest) {
                 security_level: reviewResult.security_level,
                 security_report: securityReport,
                 last_scanned_at: new Date().toISOString(),
-                skill_md_content: skillMd,
+                skill_md_content: skillContent,
                 usage_guide: readme,
                 author: repoInfo.owner,
                 license: repoInfo.license,
@@ -206,7 +205,17 @@ async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepoI
     }
 }
 
-// 获取 GitHub 文件内容
+async function fetchGitHubRawFile(owner: string, repo: string, path: string, branch: string): Promise<string | null> {
+    try {
+        const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`);
+        if (!response.ok) return null;
+        return await response.text();
+    } catch {
+        return null;
+    }
+}
+
+// 获取 GitHub 文件内容（API 优先，失败回退 raw）
 async function fetchGitHubFile(owner: string, repo: string, path: string): Promise<string | null> {
     try {
         const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
@@ -216,15 +225,18 @@ async function fetchGitHubFile(owner: string, repo: string, path: string): Promi
                 ...(process.env.GITHUB_TOKEN && { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }),
             },
         });
-        if (!response.ok) return null;
-        const data = await response.json();
-        if (data.content) {
-            return Buffer.from(data.content, 'base64').toString('utf-8');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.content) {
+                return Buffer.from(data.content, 'base64').toString('utf-8');
+            }
         }
-        return null;
     } catch {
-        return null;
+        // ignore and fallback to raw
     }
+
+    return await fetchGitHubRawFile(owner, repo, path, 'main')
+        || await fetchGitHubRawFile(owner, repo, path, 'master');
 }
 
 // AI 审核（通义千问）
