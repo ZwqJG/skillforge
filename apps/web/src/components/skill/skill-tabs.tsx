@@ -7,13 +7,12 @@ interface SkillTabsProps {
     skill: Skill;
 }
 
-type TabKey = 'usage' | 'skillmd' | 'security';
+type TabKey = 'skillmd' | 'security';
 
 export function SkillTabs({ skill }: SkillTabsProps) {
-    const [activeTab, setActiveTab] = useState<TabKey>('usage');
+    const [activeTab, setActiveTab] = useState<TabKey>('skillmd');
 
     const tabs: { key: TabKey; label: string }[] = [
-        { key: 'usage', label: '使用说明' },
         { key: 'skillmd', label: 'SKILL.md' },
         { key: 'security', label: '安全报告' },
     ];
@@ -38,19 +37,6 @@ export function SkillTabs({ skill }: SkillTabsProps) {
 
             {/* Tab 内容 */}
             <div className="py-6">
-                {activeTab === 'usage' && (
-                    <div className="prose prose-neutral dark:prose-invert max-w-none">
-                        {skill.usage_guide ? (
-                            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(skill.usage_guide) }} />
-                        ) : (
-                            <div className="text-[var(--gray-500)]">
-                                <p>暂无使用说明。</p>
-                                <p className="mt-2">安装后，在你的 Agent 中即可使用此 Skill。</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
                 {activeTab === 'skillmd' && (
                     <div className="prose prose-neutral max-w-none">
                         {skill.skill_md_content ? (
@@ -134,20 +120,79 @@ export function SkillTabs({ skill }: SkillTabsProps) {
 function markdownToHtml(markdown: string): string {
     let content = markdown.replace(/\r\n/g, '\n');
 
+    const codeBlocks: string[] = [];
+    content = content.replace(/```(\w*)\n([\s\S]*?)```/gim, (_match, _lang, code) => {
+        const idx = codeBlocks.length;
+        const escaped = String(code)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        codeBlocks.push(`<pre><code>${escaped}</code></pre>`);
+        return `@@CODEBLOCK_${idx}@@`;
+    });
+
+    const tables: string[] = [];
+    content = content.replace(/(^\|.*\|\n\|[-:| ]+\|\n(?:\|.*\|\n?)*)/gm, (match) => {
+        const html = tableToHtml(match);
+        const idx = tables.length;
+        tables.push(html);
+        return `@@TABLE_${idx}@@`;
+    });
+
     // Add dividers between sections (before H2/H3 except first line)
-    content = content.replace(/(^|\n)(##|###) /g, (match, start, level, offset) => {
+    content = content.replace(/(^|\n)(##|###) /g, (match, _start, level, offset) => {
         if (offset === 0) return match;
         return `\n<hr />\n${level} `;
     });
 
-    return content
+    content = content
         .replace(/^\s*---\s*$/gim, '<hr />')
         .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold">$1</h3>')
         .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold">$1</h2>')
         .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+        .replace(/__(.*)__/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/```(\w*)\n([\s\S]*?)```/gim, '<pre><code>$2</code></pre>')
         .replace(/`([^`]+)`/gim, '<code>$1</code>')
         .replace(/\n/gim, '<br>');
+
+    content = content.replace(/@@TABLE_(\d+)@@/g, (_m, idx) => tables[Number(idx)] || '');
+    content = content.replace(/@@CODEBLOCK_(\d+)@@/g, (_m, idx) => codeBlocks[Number(idx)] || '');
+    return content;
+}
+
+function tableToHtml(markdownTable: string): string {
+    const lines = markdownTable.trim().split('\n');
+    if (lines.length < 2) return markdownTable;
+
+    const headerCells = splitTableRow(lines[0]);
+    const bodyLines = lines.slice(2).filter((line) => line.trim().startsWith('|'));
+
+    const thead = `<thead><tr>${headerCells
+        .map((cell) => `<th>${renderInline(cell)}</th>`)
+        .join('')}</tr></thead>`;
+
+    const tbody = `<tbody>${bodyLines
+        .map((line) => {
+            const cells = splitTableRow(line);
+            return `<tr>${cells.map((cell) => `<td>${renderInline(cell)}</td>`).join('')}</tr>`;
+        })
+        .join('')}</tbody>`;
+
+    return `<table>${thead}${tbody}</table>`;
+}
+
+function splitTableRow(line: string): string[] {
+    const trimmed = line.trim();
+    const noLeading = trimmed.startsWith('|') ? trimmed.slice(1) : trimmed;
+    const noTrailing = noLeading.endsWith('|') ? noLeading.slice(0, -1) : noLeading;
+    return noTrailing.split('|').map((cell) => cell.trim());
+}
+
+function renderInline(text: string): string {
+    return text
+        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+        .replace(/__(.*)__/gim, '<strong>$1</strong>')
+        .replace(/\*(.*)\*/gim, '<em>$1</em>')
+        .replace(/`([^`]+)`/gim, '<code>$1</code>');
 }
