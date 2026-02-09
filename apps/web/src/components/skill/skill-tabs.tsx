@@ -127,7 +127,9 @@ function markdownToHtml(markdown: string): string {
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
-        codeBlocks.push(`<pre><code>${escaped}</code></pre>`);
+        codeBlocks.push(
+            `<pre class="bg-[var(--gray-50)] border border-[var(--gray-200)] rounded-lg p-3 overflow-x-auto"><code class="text-sm font-mono">${escaped}</code></pre>`
+        );
         return `@@CODEBLOCK_${idx}@@`;
     });
 
@@ -139,21 +141,14 @@ function markdownToHtml(markdown: string): string {
         return `@@TABLE_${idx}@@`;
     });
 
-    // Add dividers between sections (before H2/H3 except first line)
-    content = content.replace(/(^|\n)(##|###) /g, (match, _start, level, offset) => {
-        if (offset === 0) return match;
-        return `\n<hr />\n${level} `;
-    });
-
     content = content
-        .replace(/^\s*---\s*$/gim, '<hr />')
         .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold">$1</h3>')
         .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold">$1</h2>')
         .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/__(.*)__/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/`([^`]+)`/gim, '<code>$1</code>')
+        .replace(/`([^`]+)`/gim, '<code class="px-2 py-0.5 rounded bg-[var(--gray-100)] text-[var(--gray-700)] font-mono text-xs">$1</code>')
         .replace(/\n/gim, '<br>');
 
     content = content.replace(/@@TABLE_(\d+)@@/g, (_m, idx) => tables[Number(idx)] || '');
@@ -169,17 +164,17 @@ function tableToHtml(markdownTable: string): string {
     const bodyLines = lines.slice(2).filter((line) => line.trim().startsWith('|'));
 
     const thead = `<thead><tr>${headerCells
-        .map((cell) => `<th>${renderInline(cell)}</th>`)
+        .map((cell) => `<th class="text-left text-[var(--gray-500)] font-medium pb-2 border-b border-[var(--gray-200)]">${renderInline(cell)}</th>`)
         .join('')}</tr></thead>`;
 
     const tbody = `<tbody>${bodyLines
         .map((line) => {
             const cells = splitTableRow(line);
-            return `<tr>${cells.map((cell) => `<td>${renderInline(cell)}</td>`).join('')}</tr>`;
+            return `<tr>${cells.map((cell) => `<td class="py-2 border-b border-[var(--gray-100)]">${renderInline(cell)}</td>`).join('')}</tr>`;
         })
         .join('')}</tbody>`;
 
-    return `<table>${thead}${tbody}</table>`;
+    return `<table class="w-full text-sm border-collapse">${thead}${tbody}</table>`;
 }
 
 function splitTableRow(line: string): string[] {
@@ -194,5 +189,5 @@ function renderInline(text: string): string {
         .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
         .replace(/__(.*)__/gim, '<strong>$1</strong>')
         .replace(/\*(.*)\*/gim, '<em>$1</em>')
-        .replace(/`([^`]+)`/gim, '<code>$1</code>');
+        .replace(/`([^`]+)`/gim, '<code class="px-2 py-0.5 rounded bg-[var(--gray-100)] text-[var(--gray-700)] font-mono text-xs">$1</code>');
 }
