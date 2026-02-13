@@ -349,14 +349,18 @@ function ruleBasedReview(skillMd: string, readme: string, repoInfo: GitHubRepoIn
         risks.push('检测到危险命令模式（如 rm -rf, curl | sh）');
     }
 
-    // 检查敏感路径
-    if (/~\/\.ssh|\/etc\/passwd|\/etc\/shadow|\.env\b/i.test(content)) {
+    // 检查敏感系统路径访问（不再将 README 中的 .env 配置说明视为风险）
+    const sensitiveSystemPathPattern = /~\/\.ssh|\/etc\/passwd|\/etc\/shadow/i;
+    const sensitiveEnvAccessPattern = /\b(cat|less|more|head|tail|grep|sed|awk|cp|mv|scp|rsync)\s+[^\n]*\.env(?:\b|[^a-z0-9_])/i;
+    if (sensitiveSystemPathPattern.test(content) || sensitiveEnvAccessPattern.test(content)) {
         score -= 30;
         risks.push('检测到敏感路径访问');
     }
 
-    // 检查外部网络调用
-    if (/fetch\(|axios\.|http:\/\/|https:\/\/(?!github\.com)/i.test(content)) {
+    // 检查可执行的外部网络调用（避免把普通文档链接误判为风险）
+    const executableNetworkPattern =
+        /\bfetch\s*\(|\baxios\.(get|post|put|patch|delete|request)\s*\(|\brequests\.(get|post|put|patch|delete|request)\s*\(|\bhttpx\.(get|post|put|patch|delete|request)\s*\(|\bcurl\s+https?:\/\/|\bwget\s+https?:\/\/|\binvoke-webrequest\b/i;
+    if (executableNetworkPattern.test(content)) {
         score -= 10;
         risks.push('包含外部网络调用');
     }
