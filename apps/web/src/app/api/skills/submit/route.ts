@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { extractSkillMetadata } from '@/lib/skill-metadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 9. 解析 SKILL.md
-        const skillInfo = parseSkillMd(skillContent);
+        const skillInfo = extractSkillMetadata(skillContent, 'development');
 
         // 10. 生成 slug
         const slug = generateSlug(skillInfo.name || repoInfo.name);
@@ -134,8 +135,8 @@ export async function POST(request: NextRequest) {
                 github_key: githubKey,
                 github_stars: repoInfo.stars,
                 install_count: 0,
-                category: skillInfo.category || 'development',
-                tags: skillInfo.tags || [],
+                category: skillInfo.category,
+                tags: skillInfo.tags,
                 platforms: ['claude-code', 'cursor', 'universal'],
                 security_level: reviewResult.security_level,
                 security_report: securityReport,
@@ -387,34 +388,6 @@ function ruleBasedReview(skillMd: string, readme: string, repoInfo: GitHubRepoIn
         suggestions,
         reject_reason: passed ? null : '安全扫描未通过：' + risks.join(', '),
     };
-}
-
-// 解析 SKILL.md
-function parseSkillMd(content: string) {
-    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-    let name = '';
-    let description = '';
-    let category = '';
-    let tags: string[] = [];
-
-    if (frontmatterMatch) {
-        const yaml = frontmatterMatch[1];
-        name = yaml.match(/name:\s*(.+)/)?.[1]?.trim() || '';
-        description = yaml.match(/description:\s*(.+)/)?.[1]?.trim() || '';
-        category = yaml.match(/category:\s*(.+)/)?.[1]?.trim() || '';
-        const tagsMatch = yaml.match(/tags:\s*\[(.*?)\]/);
-        if (tagsMatch) {
-            tags = tagsMatch[1].split(',').map(t => t.trim().replace(/['"]/g, ''));
-        }
-    }
-
-    // 如果没有 frontmatter，尝试从 H1 标题获取名称
-    if (!name) {
-        const h1Match = content.match(/^#\s+(.+)/m);
-        name = h1Match?.[1]?.trim() || 'Untitled Skill';
-    }
-
-    return { name, description, category, tags };
 }
 
 // 生成 slug

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { extractSkillMetadata } from '@/lib/skill-metadata';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,7 @@ export async function POST(
             await fetchGitHubFile(owner, repo, 'readme.md') || '';
 
         // 解析 SKILL.md
-        const skillInfo = parseSkillMd(skillMd);
+        const skillInfo = extractSkillMetadata(skillMd, 'development');
 
         // 更新数据库
         const { error: updateError } = await supabase
@@ -87,6 +88,7 @@ export async function POST(
                 description: skillInfo.description || skill.description,
                 summary: skillInfo.description || skill.summary,
                 github_stars: repoInfo.stars,
+                category: skillInfo.category || skill.category,
                 tags: skillInfo.tags.length > 0 ? skillInfo.tags : skill.tags,
                 skill_md_content: skillMd,
                 usage_guide: readme,
@@ -153,31 +155,4 @@ async function fetchGitHubFile(owner: string, repo: string, path: string): Promi
     } catch {
         return null;
     }
-}
-
-// 解析 SKILL.md
-function parseSkillMd(content: string) {
-    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-    let name = '';
-    let description = '';
-    let category = '';
-    let tags: string[] = [];
-
-    if (frontmatterMatch) {
-        const yaml = frontmatterMatch[1];
-        name = yaml.match(/name:\s*(.+)/)?.[1]?.trim() || '';
-        description = yaml.match(/description:\s*(.+)/)?.[1]?.trim() || '';
-        category = yaml.match(/category:\s*(.+)/)?.[1]?.trim() || '';
-        const tagsMatch = yaml.match(/tags:\s*\[(.*?)\]/);
-        if (tagsMatch) {
-            tags = tagsMatch[1].split(',').map(t => t.trim().replace(/['"]/g, ''));
-        }
-    }
-
-    if (!name) {
-        const h1Match = content.match(/^#\s+(.+)/m);
-        name = h1Match?.[1]?.trim() || '';
-    }
-
-    return { name, description, category, tags };
 }

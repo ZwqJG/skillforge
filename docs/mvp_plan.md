@@ -192,6 +192,35 @@ npx skillforge-tools add seo-audit --target codex
 - **每日**同步 GitHub Stars 变化
 - 监控已收录仓库的更新
 
+#### 标签与分类生成规则（V2）
+
+为解决 `SKILL.md` frontmatter 不规范（缺少 `tags/category`、多行 YAML、`metadata.tags` 等）导致的数据不准确问题，统一采用以下策略：
+
+1. 字段提取优先级
+   1. 显式字段：`tags`、`category`
+   2. 扩展字段：`metadata.tags`、`metadata.category`
+   3. 结构兼容：支持单行数组、逗号分隔、多行 YAML 列表
+
+2. 自动推断（即使显式字段存在也执行）
+   1. 基于 `name + description + SKILL.md 正文` 做关键词推断
+   2. 生成 `category`（development/operations/design/office/marketing/creative）
+   3. 生成语义标签（如 `mcp`、`frontend`、`testing`、`seo`、`document` 等）
+
+3. 合并与去重
+   1. 最终标签 = 显式标签 + 推断标签
+   2. 统一标准化：小写、空格/下划线转 `-`、同义词归一
+   3. 去重并限制最大标签数（当前上限：8）
+
+4. 兜底规则
+   1. `category` 无法识别时，回退到来源默认分类（最终兜底 `development`）
+   2. 标签为空时，至少写入 1 个分类标签（即 `category`）
+   3. `description` 缺失时，自动从正文提取摘要句作为描述
+
+5. 落库要求
+   1. `category` 必填（非空）
+   2. `tags` 必填（非空数组，且已去重）
+   3. 抓取入库与用户提交/更新接口统一使用同一套解析与推断规则
+
 ---
 
 ## 五、UI 设计规范

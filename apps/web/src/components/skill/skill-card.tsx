@@ -21,7 +21,7 @@ export function SkillCard({ skill }: SkillCardProps) {
 
             {/* 描述 */}
             <p className="text-[var(--gray-500)] text-sm mb-4 line-clamp-2">
-                {skill.description}
+                {skill.summary || skill.description}
             </p>
 
             {/* 标签 */}

@@ -1,4 +1,5 @@
 import { Skill, Category, Platform, SecurityLevel } from '@/types';
+import { buildSkillIntroZh, buildSkillIntroZhShort } from './skill-intro';
 
 export const CLI_NPX_NAME = process.env.NEXT_PUBLIC_SKILLFORGE_CLI_NAME ?? 'skillforge-tools';
 
@@ -916,6 +917,47 @@ interface GetSkillsResult {
     page_size: number;
 }
 
+function localizeSkillDescription(skill: Skill): Skill {
+    const description = buildSkillIntroZh(skill);
+    return {
+        ...skill,
+        description,
+        summary: buildSkillIntroZhShort({
+            ...skill,
+            description,
+        }),
+    };
+}
+
+function mapRawSkill(d: Record<string, unknown>): Skill {
+    const mapped: Skill = {
+        id: String(d.id ?? ''),
+        name: String(d.name ?? ''),
+        slug: String(d.slug ?? ''),
+        description: String(d.description ?? ''),
+        summary: String(d.summary ?? ''),
+        github_url: String(d.github_url ?? ''),
+        github_stars: Number(d.github_stars ?? 0),
+        install_count: Number(d.install_count ?? 0),
+        category: (d.category as Category) || 'development',
+        tags: Array.isArray(d.tags) ? (d.tags as string[]) : [],
+        platforms: Array.isArray(d.platforms) ? (d.platforms as Platform[]) : ['universal'],
+        security_level: Number(d.security_level ?? 0) as SecurityLevel,
+        security_report: (d.security_report as Skill['security_report']) ?? null,
+        last_scanned_at: typeof d.last_scanned_at === 'string' ? d.last_scanned_at : null,
+        skill_md_content: String(d.skill_md_content ?? ''),
+        usage_guide: String(d.usage_guide ?? ''),
+        author: String(d.author ?? ''),
+        license: String(d.license ?? ''),
+        version: String(d.version ?? '1.0.0'),
+        source: (d.source as Skill['source']) || 'github',
+        created_at: String(d.created_at ?? new Date().toISOString()),
+        updated_at: String(d.updated_at ?? new Date().toISOString()),
+    };
+
+    return localizeSkillDescription(mapped);
+}
+
 export async function getSkills(params: GetSkillsParams = {}): Promise<GetSkillsResult> {
     const {
         q,
@@ -969,30 +1011,7 @@ export async function getSkills(params: GetSkillsParams = {}): Promise<GetSkills
             const { data, error, count } = await query;
 
             if (!error && data) {
-                const skills: Skill[] = data.map((d: any) => ({
-                    id: d.id,
-                    name: d.name,
-                    slug: d.slug,
-                    description: d.description || '',
-                    summary: d.summary || '',
-                    github_url: d.github_url || '',
-                    github_stars: d.github_stars || 0,
-                    install_count: d.install_count || 0,
-                    category: d.category as Category,
-                    tags: d.tags || [],
-                    platforms: (d.platforms || ['universal']) as Platform[],
-                    security_level: (d.security_level || 0) as SecurityLevel,
-                    security_report: d.security_report || null,
-                    last_scanned_at: d.last_scanned_at || null,
-                    skill_md_content: d.skill_md_content || '',
-                    usage_guide: d.usage_guide || '',
-                    author: d.author || '',
-                    license: d.license || '',
-                    version: d.version || '1.0.0',
-                    source: (d.source || 'github') as Skill['source'],
-                    created_at: d.created_at || new Date().toISOString(),
-                    updated_at: d.updated_at || new Date().toISOString(),
-                }));
+                const skills: Skill[] = data.map((d) => mapRawSkill(d as Record<string, unknown>));
 
                 // 平台过滤（Supabase 不支持数组包含查询，在客户端过滤）
                 let filteredSkills = skills;
@@ -1057,7 +1076,7 @@ export async function getSkills(params: GetSkillsParams = {}): Promise<GetSkills
 
     const total = filtered.length;
     const start = (page - 1) * page_size;
-    const paginated = filtered.slice(start, start + page_size);
+    const paginated = filtered.slice(start, start + page_size).map(localizeSkillDescription);
 
     return {
         skills: paginated,
@@ -1086,30 +1105,7 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
             if (!error && data) {
                 console.log('[getSkillBySlug] Using Supabase data, usage_guide length:', data.usage_guide?.length || 0);
                 // 转换数据格式
-                return {
-                    id: data.id,
-                    name: data.name,
-                    slug: data.slug,
-                    description: data.description || '',
-                    summary: data.summary || '',
-                    github_url: data.github_url || '',
-                    github_stars: data.github_stars || 0,
-                    install_count: data.install_count || 0,
-                    category: data.category as Category,
-                    tags: data.tags || [],
-                    platforms: (data.platforms || ['universal']) as Platform[],
-                    security_level: (data.security_level || 0) as SecurityLevel,
-                    security_report: data.security_report || null,
-                    last_scanned_at: data.last_scanned_at || null,
-                    skill_md_content: data.skill_md_content || '',
-                    usage_guide: data.usage_guide || '',
-                    author: data.author || '',
-                    license: data.license || '',
-                    version: data.version || '1.0.0',
-                    source: (data.source || 'github') as Skill['source'],
-                    created_at: data.created_at || new Date().toISOString(),
-                    updated_at: data.updated_at || new Date().toISOString(),
-                };
+                return mapRawSkill(data);
             }
         } catch (e) {
             console.error('Supabase query failed:', e);
@@ -1119,7 +1115,7 @@ export async function getSkillBySlug(slug: string): Promise<Skill | null> {
     // 回退到 Mock 数据
     console.log('[getSkillBySlug] Falling back to mock data');
     const skill = MOCK_SKILLS.find(s => s.slug === slug);
-    return skill || null;
+    return skill ? localizeSkillDescription(skill) : null;
 }
 
 export async function getHotSkills(limit = 6): Promise<Skill[]> {
@@ -1134,30 +1130,7 @@ export async function getHotSkills(limit = 6): Promise<Skill[]> {
                 .limit(limit);
 
             if (!error && data) {
-                return data.map((d: any) => ({
-                    id: d.id,
-                    name: d.name,
-                    slug: d.slug,
-                    description: d.description || '',
-                    summary: d.summary || '',
-                    github_url: d.github_url || '',
-                    github_stars: d.github_stars || 0,
-                    install_count: d.install_count || 0,
-                    category: d.category as Category,
-                    tags: d.tags || [],
-                    platforms: (d.platforms || ['universal']) as Platform[],
-                    security_level: (d.security_level || 0) as SecurityLevel,
-                    security_report: d.security_report || null,
-                    last_scanned_at: d.last_scanned_at || null,
-                    skill_md_content: d.skill_md_content || '',
-                    usage_guide: d.usage_guide || '',
-                    author: d.author || '',
-                    license: d.license || '',
-                    version: d.version || '1.0.0',
-                    source: (d.source || 'github') as Skill['source'],
-                    created_at: d.created_at || new Date().toISOString(),
-                    updated_at: d.updated_at || new Date().toISOString(),
-                }));
+                return data.map((d) => mapRawSkill(d as Record<string, unknown>));
             }
         } catch (e) {
             console.error('Supabase getHotSkills failed:', e);
@@ -1166,7 +1139,8 @@ export async function getHotSkills(limit = 6): Promise<Skill[]> {
 
     return [...MOCK_SKILLS]
         .sort((a, b) => b.github_stars - a.github_stars)
-        .slice(0, limit);
+        .slice(0, limit)
+        .map(localizeSkillDescription);
 }
 
 export async function getSkillsByCategory(category: Category, limit = 6): Promise<Skill[]> {
@@ -1182,30 +1156,7 @@ export async function getSkillsByCategory(category: Category, limit = 6): Promis
                 .limit(limit);
 
             if (!error && data) {
-                return data.map((d: any) => ({
-                    id: d.id,
-                    name: d.name,
-                    slug: d.slug,
-                    description: d.description || '',
-                    summary: d.summary || '',
-                    github_url: d.github_url || '',
-                    github_stars: d.github_stars || 0,
-                    install_count: d.install_count || 0,
-                    category: d.category as Category,
-                    tags: d.tags || [],
-                    platforms: (d.platforms || ['universal']) as Platform[],
-                    security_level: (d.security_level || 0) as SecurityLevel,
-                    security_report: d.security_report || null,
-                    last_scanned_at: d.last_scanned_at || null,
-                    skill_md_content: d.skill_md_content || '',
-                    usage_guide: d.usage_guide || '',
-                    author: d.author || '',
-                    license: d.license || '',
-                    version: d.version || '1.0.0',
-                    source: (d.source || 'github') as Skill['source'],
-                    created_at: d.created_at || new Date().toISOString(),
-                    updated_at: d.updated_at || new Date().toISOString(),
-                }));
+                return data.map((d) => mapRawSkill(d as Record<string, unknown>));
             }
         } catch (e) {
             console.error('Supabase getSkillsByCategory failed:', e);
@@ -1215,5 +1166,6 @@ export async function getSkillsByCategory(category: Category, limit = 6): Promis
     return MOCK_SKILLS
         .filter(s => s.category === category)
         .sort((a, b) => b.github_stars - a.github_stars)
-        .slice(0, limit);
+        .slice(0, limit)
+        .map(localizeSkillDescription);
 }
